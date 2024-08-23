@@ -33,8 +33,7 @@ class CaptchaMixin:
             logger.exception(e)
             return False
         self.driver.run_js(
-            f"document.querySelector('#g-recaptcha-response').text = {
-                solved_key}"
+            f"document.querySelector('#g-recaptcha-response').text = {solved_key}"
         )
         self.driver.select(".submit-btn-wrap button").click()
         return True
