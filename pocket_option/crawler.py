@@ -1,6 +1,6 @@
 from os import environ
 
-from captcha import CaptchaMixin
+from .captcha import CaptchaMixin
 from botasaurus.browser import Driver
 from random import choice
 from loguru import logger
@@ -32,8 +32,7 @@ class Crawler(CaptchaMixin):
         logger.success("The parser logged into the account!")
 
     def check_balance(self):
-        self.driver.get(
-            "https://pocketoption.com/ru/cabinet/demo-quick-high-low/")
+        self.driver.get("https://pocketoption.com/ru/cabinet/demo-quick-high-low/")
         logger.info("Go to the demo account")
         balance = self.driver.select(
             "div.balance-info-block__balance", wait=10
@@ -60,22 +59,30 @@ class Crawler(CaptchaMixin):
         Set bid time, and return it time in seconds
         """
         time_element = self.driver.select(".block--expiration-inputs", wait=10)
-        title = time_element.select(".block__title").text
-        if title.strip().lower() != "время":
-            time_element.click(".buttons")
+        while time_element.select(".block__title").text.strip().lower() != "время":
+            time_element.select(".buttons > a", wait=5).click()
 
-        time_element.click(".value__val")
+        time_element.select(".value__val", wait=5).click()
         # Set time
         time = randint(10, 59)
-        self.driver.run_js(
-            f"document.querySelector('.trading-panel-modal__in>.rw:nth-of-type(3) input').value = {
-                time}"
+        input = self.driver.select(
+            ".trading-panel-modal__in>.rw:nth-of-type(3)", wait=10
         )
-        time_element.click(".value__val")
+        val = int(input.select("input").get_attribute("value"))
+        if val > time:
+            for _ in range(val - time):
+                input.select(".btn-minus").click()
+        if val < time:
+            for _ in range(time - val):
+                input.select(".btn-plus").click()
+        time_element.select(".value__val").click()
         return time
 
     def create_bid(self):
-        self.driver.click("i.fa.fa-caret-down", wait=10)
+        while not self.driver.select_all(
+            "li.alist__item:not(.alist__item--no-active)", wait=1
+        ):
+            self.driver.click("i.fa.fa-caret-down", wait=10)
         all_stocks = [
             item.select("a.alist__link")
             for item in self.driver.select_all(

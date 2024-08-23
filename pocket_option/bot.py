@@ -32,7 +32,11 @@ async def bot_loop():
         await bot.send_media_group(
             chat_id=SEND_GROUP_ID,
             media=[
-                types.InputFile("output/screenshots/screen1.png"),
-                types.InputFile("output/screenshots/screen2.png"),
+                types.InputMediaPhoto(
+                    media=types.FSInputFile("output/screenshots/screen1.png")
+                ),
+                types.InputMediaPhoto(
+                    media=types.FSInputFile("output/screenshots/screen2.png")
+                ),
             ],
         )
