@@ -22,7 +22,13 @@ async def bot_loop():
     )
     crawler.login_pocket()
     while True:
-        crawler.step()
+        data = crawler.step()
+        call_text = "UP" if data["call"] else "DOWN"
+        await bot.send_message(
+            chat_id=SEND_GROUP_ID,
+            text=f"pair: {data['pair']}\ntime: "
+            + f"{data['time']}sec\ncall: {call_text}",
+        )
         await bot.send_media_group(
             chat_id=SEND_GROUP_ID,
             media=[
