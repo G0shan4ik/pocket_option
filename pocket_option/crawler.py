@@ -32,7 +32,8 @@ class Crawler(CaptchaMixin):
         logger.success("The parser logged into the account!")
 
     def check_balance(self):
-        self.driver.get("https://pocketoption.com/ru/cabinet/demo-quick-high-low/")
+        self.driver.get(
+            "https://pocketoption.com/ru/cabinet/demo-quick-high-low/")
         logger.info("Go to the demo account")
         balance = self.driver.select(
             "div.balance-info-block__balance", wait=10
@@ -56,19 +57,23 @@ class Crawler(CaptchaMixin):
 
     def set_time(self) -> int:
         """
-        Set bid time, and return it time in seconds
+        Set bid time, and return time in seconds
         """
         time_element = self.driver.select(".block--expiration-inputs", wait=10)
         while time_element.select(".block__title").text.strip().lower() != "время":
+            # Если стоит неправильный формат времени, в тайтеле "Время UTC+3"
             time_element.select(".buttons > a", wait=5).click()
-
+        # Нажимаем на блок с временем, чтобы появилось всплывающее окно
         time_element.select(".value__val", wait=5).click()
         # Set time
         time = randint(10, 59)
+        logger.info(f"Set {time}sec")
+        # Выбираем `rw` с секундами
         input = self.driver.select(
             ".trading-panel-modal__in>.rw:nth-of-type(3)", wait=10
         )
         val = int(input.select("input").get_attribute("value"))
+        # Нажимаем либо плюс, либо минус
         if val > time:
             for _ in range(val - time):
                 input.select(".btn-minus").click()
@@ -108,10 +113,11 @@ class Crawler(CaptchaMixin):
         )
 
         self.driver.sleep(1)
-        self.driver.save_screenshot("screen1.png")
 
         btn_bid = choice([low, high])
         btn_bid.click()
+        self.driver.sleep(1)
+        self.driver.save_screenshot("screen1.png")
         logger.success("Create bid!")
         return {
             "time": time,
