@@ -21,6 +21,9 @@ class Crawler(CaptchaMixin):
         self.url = "https://pocketoption.com/ru/cabinet/demo-quick-high-low/"
 
     def login_pocket(self):
+        """
+        Enters the personal account of pocketoption
+        """
         logger.info("The beginning of filling out the login form...")
         self.driver.get(self.url)
 
@@ -32,6 +35,10 @@ class Crawler(CaptchaMixin):
         logger.success("The parser logged into the account!")
 
     def check_balance(self):
+        """
+        Checks the balance, if the balance is less than MIN_BALANCE,
+        then replenishes it by $50,000
+        """
         self.driver.get(
             "https://pocketoption.com/ru/cabinet/demo-quick-high-low/")
         logger.info("Go to the demo account")
@@ -84,6 +91,9 @@ class Crawler(CaptchaMixin):
         return time
 
     def create_bid(self):
+        """
+        The main Function that puts a BID, randomly selects a stock and make the first screenshot
+        """
         while not self.driver.select_all(
             "li.alist__item:not(.alist__item--no-active)", wait=1
         ):
@@ -101,8 +111,7 @@ class Crawler(CaptchaMixin):
         time = self.set_time()
 
         self.driver.run_js(
-            f'document.querySelector("#put-call-buttons-chart-1 > div > div.blocks-wrap > div.block.block--bet-amount > div.block__control.control.js-tour-block--bet-amount > div.control__value.value.value--several-items > div > input[type=text]").value = {
-                BID}'
+            f'document.querySelector("#put-call-buttons-chart-1 > div > div.blocks-wrap > div.block.block--bet-amount > div.block__control.control.js-tour-block--bet-amount > div.control__value.value.value--several-items > div > input[type=text]").value = {BID}'
         )
         logger.info(f"Bid == {BID}")
         low = self.driver.select("a.btn.btn-call")
@@ -126,12 +135,18 @@ class Crawler(CaptchaMixin):
         }
 
     def make_screenshot(self):
+        """
+        Takes the last screenshot
+        """
         self.driver.select("div.no-deals", wait=100)
         self.driver.sleep(1)
         self.driver.save_screenshot("screen2.png")
         logger.success("Save screenshot")
 
     def step(self):
+        """
+        The manager function, which performs all the steps in order
+        """
         self.check_balance()
         data = self.create_bid()
         self.make_screenshot()

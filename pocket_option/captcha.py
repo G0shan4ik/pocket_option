@@ -19,6 +19,9 @@ class CaptchaMixin:
         self.__solver = TwoCaptcha(environ.get("RUCAPTCHA_TOKEN"))
 
     def solve_captcha(self) -> bool:
+        """
+        Solves a captcha
+        """
         try:
             captcha_iframe = self.driver.select(".g-recaptcha iframe", wait=10)
         except:
